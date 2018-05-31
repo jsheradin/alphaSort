@@ -12,18 +12,55 @@ public class alphaTree {
     public static void main(String[] args){
         long startTime = System.currentTimeMillis();
 
-        alphaTree test = new alphaTree(args[0]);
+        String dictFile = args[1];
+        ArrayList<String> dictWords = readList(dictFile);
+        System.out.printf("Dictionary size: %d\n", dictWords.size());
+        String testFile = args[0];
+        ArrayList<String> testWords = readList(testFile);
+        System.out.printf("Test list size: %d\n", testWords.size());
+
+
+        System.out.printf("Building tree: ");
+        long buildTime = System.currentTimeMillis();
+        alphaTree test = new alphaTree(dictFile);
+        System.out.printf("%d ms\n", System.currentTimeMillis() - buildTime);
 
         //for(int i=0; i<test.tree.size(); i++){
         //    System.out.printf("%s\n", test.tree.get(i).getLetter());
         //}
+        //
+        //System.out.printf("First level size: %d\n", test.tree.size());
+        //
+        //String testWord = "programming";
+        //System.out.printf("Testing isWord with: \"%s\", %d\n", testWord, test.isWord(testWord));
 
-        System.out.printf("First level size: %d\n", test.tree.size());
+        System.out.printf("Testing ArrayList.contains: ");
+        ArrayList<Boolean> results1 = new ArrayList<Boolean>();
+        long testTime1 = System.currentTimeMillis();
+        for(int i=0; i<testWords.size(); i++){
+            results1.add(dictWords.contains(testWords.get(i)));
+        }
+        System.out.printf("%d ms\n", System.currentTimeMillis() - testTime1);
 
-        String testWord = "programming";
-        System.out.printf("Testing isWord with: \"%s\", %d\n", testWord, test.isWord(testWord));
+        System.out.printf("Testing alphaTree.isWord: ");
+        ArrayList<Integer> results2 = new ArrayList<Integer>();
+        long testTime2 = System.currentTimeMillis();
+        for(int i=0; i<testWords.size(); i++){
+            results2.add(test.isWord(testWords.get(i)));
+        }
+        System.out.printf("%d ms\n", System.currentTimeMillis() - testTime2);
 
-        System.out.printf("Execution time: %d ms\n", System.currentTimeMillis() - startTime);
+        System.out.printf("Testing concurrence: \n");
+        int inconst = 0;
+        for(int i=0; i<results1.size(); i++){
+            if(results1.get(i) != (results2.get(i) > 0)){
+                inconst++;
+                System.out.printf("Inconsitency: %s\n", testWords.get(i));
+            }
+        }
+        System.out.printf("Inconsistencies: %d\n", inconst);
+
+        System.out.printf("Total execution time: %d ms\n", System.currentTimeMillis() - startTime);
     }
 
     //Builds new tree from file
@@ -74,19 +111,17 @@ public class alphaTree {
 
     //Reads a file containing words into an ArrayList
     private static ArrayList<String> readList(String file){
-        Scanner scan = null;
+        ArrayList words = new ArrayList<String>();
         try {
-            scan = new Scanner(new File(file));
+            Scanner scan = new Scanner(new File(file));
+            while(scan.hasNextLine()){
+                words.add(scan.next());
+            }
+            scan.close();
         } catch (Exception e){
             System.err.printf("File read error: %s\n", e);
             System.exit(1);
         }
-
-        ArrayList words = new ArrayList<String>();
-        while(scan.hasNextLine()){
-            words.add(scan.next());
-        }
-        scan.close();
 
         return words;
 
